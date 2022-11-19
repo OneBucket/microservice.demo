@@ -1,0 +1,9 @@
+twitter-to-kafka-service:
+  twitter-keywords:
+    - Java
+    - Microservice
+    - Spring
+    - kafka
+    - Elasticsearch
+  welcome_message:
+    - hello,world
