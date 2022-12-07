@@ -12,6 +12,10 @@ import java.util.List;
 public class TwitterToKafkaConfigData {
     private List<String> twitterKeywords;
     private List<String> welcomeMessage;
+    private String twitterV2BaseUrl;
+    private String twitterV2RulesBaseUrl;
+    private String twitterV2BearerToken;
+
 
 
 }
