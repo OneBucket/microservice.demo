@@ -2,6 +2,7 @@ package com.microservice.demo.twitter.to.kafka.service.runner.impl;
 
 import com.microservice.demo.twitter.to.kafka.service.config.TwitterToKafkaConfigData;
 import com.microservice.demo.twitter.to.kafka.service.listener.TwitterStatusListener;
+import com.microservice.demo.twitter.to.kafka.service.runner.StreamRunner;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -17,14 +18,21 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import twitter4j.Status;
+import twitter4j.TwitterException;
+import twitter4j.TwitterObjectFactory;
 
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 
@@ -34,6 +42,15 @@ public class TwitterStreamHelper {
 
     private final TwitterToKafkaConfigData configData;
     private final TwitterStatusListener statusListener;
+
+    private static String TweetAsRawJson = "{" +
+            "\"created_at\" : \"{0}\","+
+            "\"id\" : \"{1}\","+
+            "\"text\" : \"{2}\","+
+            "\"user\" : \"{3}\",";
+    private static final String TWITTER_STATUS_DATE_FORMAT = "EEE MMM dd HH:mm:ss zzz yyyy";
+
+
     public TwitterStreamHelper(TwitterToKafkaConfigData configData, TwitterStatusListener statusListener) {
         this.configData = configData;
         this.statusListener = statusListener;
@@ -60,6 +77,20 @@ public class TwitterStreamHelper {
             while (line != null) {
                 System.out.println(line);
                 line = reader.readLine();
+                if(!line.isEmpty()) {
+                    String tweet = getFormattedString(line);
+                    Status status = null;
+                    try{
+                        status = TwitterObjectFactory.createStatus(tweet);
+                    } catch (TwitterException e) {
+                        LOG.error("cannot get status from tweet {}", tweet, e);
+                    }
+                    if(status != null){
+                        statusListener.onStatus(status);
+                    }
+
+                }
+
             }
         }
 
@@ -182,6 +213,23 @@ public class TwitterStreamHelper {
         }
     }
 
+    private String getFormattedString(String data) {
+        JSONObject jsonObject = (JSONObject) new JSONObject(data).get("data");
+        String[] formattedData = new String[]{
+                ZonedDateTime.parse(jsonObject.get("created_at").toString()).withZoneSameInstant(ZoneId.of("UTC"))
+                        .format(DateTimeFormatter.ofPattern(TWITTER_STATUS_DATE_FORMAT, Locale.ENGLISH)),
+                jsonObject.get("id").toString(),
+                jsonObject.get("text").toString(),
+                jsonObject.get("user").toString()
+        };
 
+        String tweet = TweetAsRawJson;
+
+        for(int i = 0; i < formattedData.length; i++) {
+            tweet = tweet.replace("{" + i + "}", formattedData[i]);
+        }
+        return tweet;
+
+    }
 
 }

@@ -1,13 +1,13 @@
 package com.microservice.demo.twitter.to.kafka.service;
 
 import com.microservice.demo.twitter.to.kafka.service.config.TwitterToKafkaConfigData;
+import com.microservice.demo.twitter.to.kafka.service.runner.StreamRunner;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-
+import twitter4j.TwitterException;
 
 
 @SpringBootApplication
@@ -16,12 +16,16 @@ public class TwitterToKafkaServiceApplication implements CommandLineRunner {
     private static final Logger LOG = LoggerFactory.getLogger(TwitterToKafkaServiceApplication.class);
     private final TwitterToKafkaConfigData twitterToKafkaConfigData;
 
-    public TwitterToKafkaServiceApplication(TwitterToKafkaConfigData twitterToKafkaConfigData) {
+    private final StreamRunner streamRunner;
+
+    public TwitterToKafkaServiceApplication(TwitterToKafkaConfigData twitterToKafkaConfigData, StreamRunner streamRunner) {
         //using constructor rather than annotaion:
         //1.can set a final object which is immutable and thread safe
         //2.without using reflection, can be faster
         //3.force to create required dependency, here is twitterToKafkaConfigData
         this.twitterToKafkaConfigData = twitterToKafkaConfigData;
+
+        this.streamRunner = streamRunner;
     }
 
     public static void main(String[] args) {
@@ -29,10 +33,11 @@ public class TwitterToKafkaServiceApplication implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) {
+    public void run(String... args) throws TwitterException {
         LOG.info("start twitter to kafka application");
         LOG.info(twitterToKafkaConfigData.getTwitterKeywords().toString());
         LOG.info(twitterToKafkaConfigData.getWelcomeMessage().toString());
+        streamRunner.start();
 
 
     }
