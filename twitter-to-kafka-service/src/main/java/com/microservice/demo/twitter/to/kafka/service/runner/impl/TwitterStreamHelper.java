@@ -4,6 +4,7 @@ import com.microservice.demo.twitter.to.kafka.service.config.TwitterToKafkaConfi
 import com.microservice.demo.twitter.to.kafka.service.listener.TwitterStatusListener;
 import com.microservice.demo.twitter.to.kafka.service.runner.StreamRunner;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
@@ -18,6 +19,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import twitter4j.Status;
 import twitter4j.TwitterException;
 import twitter4j.TwitterObjectFactory;
@@ -30,12 +32,9 @@ import java.net.URISyntaxException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
-
+@Component
 public class TwitterStreamHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(TwitterStreamHelper.class);
@@ -47,7 +46,8 @@ public class TwitterStreamHelper {
             "\"created_at\" : \"{0}\","+
             "\"id\" : \"{1}\","+
             "\"text\" : \"{2}\","+
-            "\"user\" : \"{3}\",";
+            "\"user\":{\"id\":\"{3}\"}" +
+            "}";
     private static final String TWITTER_STATUS_DATE_FORMAT = "EEE MMM dd HH:mm:ss zzz yyyy";
 
 
@@ -58,9 +58,10 @@ public class TwitterStreamHelper {
 
 
     void connectStream(String bearerToken) throws IOException, URISyntaxException {
-
+        HttpHost proxy = new HttpHost("127.0.0.1", 10809, "http");
         HttpClient httpClient = HttpClients.custom()
                 .setDefaultRequestConfig(RequestConfig.custom()
+                        .setProxy(proxy)
                         .setCookieSpec(CookieSpecs.STANDARD).build())
                 .build();
 
@@ -100,7 +101,7 @@ public class TwitterStreamHelper {
      * Helper method to setup rules before streaming data
      * */
 
-    private static void setupRules(String bearerToken, Map<String, String> rules) throws IOException, URISyntaxException {
+    void setupRules(String bearerToken, Map<String, String> rules) throws IOException, URISyntaxException {
         List<String> existingRules = getRules(bearerToken);
         if (existingRules.size() > 0) {
             deleteRules(bearerToken, existingRules);
@@ -112,8 +113,11 @@ public class TwitterStreamHelper {
      * Helper method to create rules for filtering
      * */
     private static void createRules(String bearerToken, Map<String, String> rules) throws URISyntaxException, IOException {
+        //add proxy to avoid being block
+        HttpHost proxy = new HttpHost("127.0.0.1", 10809, "http");
         HttpClient httpClient = HttpClients.custom()
                 .setDefaultRequestConfig(RequestConfig.custom()
+                        .setProxy(proxy)
                         .setCookieSpec(CookieSpecs.STANDARD).build())
                 .build();
 
@@ -136,8 +140,10 @@ public class TwitterStreamHelper {
      * */
     private static List<String> getRules(String bearerToken) throws URISyntaxException, IOException {
         List<String> rules = new ArrayList<>();
+        HttpHost proxy = new HttpHost("127.0.0.1", 10809, "http");
         HttpClient httpClient = HttpClients.custom()
                 .setDefaultRequestConfig(RequestConfig.custom()
+                        .setProxy(proxy)
                         .setCookieSpec(CookieSpecs.STANDARD).build())
                 .build();
 
@@ -165,8 +171,10 @@ public class TwitterStreamHelper {
      * Helper method to delete rules
      * */
     private static void deleteRules(String bearerToken, List<String> existingRules) throws URISyntaxException, IOException {
+        HttpHost proxy = new HttpHost("127.0.0.1", 10809, "http");
         HttpClient httpClient = HttpClients.custom()
                 .setDefaultRequestConfig(RequestConfig.custom()
+                        .setProxy(proxy)
                         .setCookieSpec(CookieSpecs.STANDARD).build())
                 .build();
 
@@ -220,7 +228,7 @@ public class TwitterStreamHelper {
                         .format(DateTimeFormatter.ofPattern(TWITTER_STATUS_DATE_FORMAT, Locale.ENGLISH)),
                 jsonObject.get("id").toString(),
                 jsonObject.get("text").toString(),
-                jsonObject.get("user").toString()
+                jsonObject.get("author_id").toString()
         };
 
         String tweet = TweetAsRawJson;
@@ -230,6 +238,15 @@ public class TwitterStreamHelper {
         }
         return tweet;
 
+    }
+
+    public Map<String, String> getRules() {
+        Map<String, String> rules = new HashMap<>();
+        List<String> keywords = configData.getTwitterKeywords();
+        for(String keyword:keywords) {
+            rules.put(keyword, "keyword " + keyword);
+        }
+        return rules;
     }
 
 }
