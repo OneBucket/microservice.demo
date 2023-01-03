@@ -1,6 +1,7 @@
 package com.microservice.demo.common.config;
 
 import com.microservice.demo.config.RetryConfigData;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
@@ -14,7 +15,7 @@ public class RetryConfig {
         this.retryConfigData = configData;
 
     }
-
+    @Bean
     public RetryTemplate retryTemplate(){
         RetryTemplate retryTemplate = new RetryTemplate();
 
