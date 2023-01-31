@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 import twitter4j.TwitterException;
 
+import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
@@ -30,13 +31,13 @@ public class TwitterStreamRunner implements StreamRunner {
     @Override
     public void start() throws TwitterException {
         String bearerToken = twitterToKafkaConfigData.getTwitterV2BearerToken();
-        if(bearerToken != null) {
-            try{
+        if (bearerToken != null) {
+            try {
                 twitterStreamHelper.setupRules(bearerToken, twitterStreamHelper.getRules());
                 twitterStreamHelper.connectStream(bearerToken);
             } catch (IOException | URISyntaxException e) {
                 LOG.error("Error streaming tweet", e);
-                throw new RuntimeException("Error streaming tweet",e);
+                throw new RuntimeException("Error streaming tweet", e);
             }
 
         }
@@ -44,3 +45,4 @@ public class TwitterStreamRunner implements StreamRunner {
 
     }
 }
+

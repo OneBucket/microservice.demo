@@ -98,6 +98,8 @@ public class TwitterStreamHelper {
 
     }
 
+
+
     /*
      * Helper method to setup rules before streaming data
      * */
