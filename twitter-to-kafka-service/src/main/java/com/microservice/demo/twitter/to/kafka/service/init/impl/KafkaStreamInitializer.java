@@ -7,7 +7,9 @@ import com.microservice.demo.twitter.to.kafka.service.transformer.TwitterStatusT
 import com.microservices.demo.kafka.avro.model.TwitterAvroModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
+@Component
 public class KafkaStreamInitializer implements StreamInitializer {
 
     private static final Logger LOG = LoggerFactory.getLogger(KafkaStreamInitializer.class);
@@ -26,7 +28,8 @@ public class KafkaStreamInitializer implements StreamInitializer {
     public void init() {
         adminClient.createTopics();
         adminClient.checkSchemaRegistry();
-        LOG.info("Topic with names {} is creates sucessfully", configData.getTopicNameToCreate().toArray());
+        LOG.info("Topic with names {} is creates successfully", configData.getTopicNameToCreate().toArray());
+
 
 
     }

@@ -62,15 +62,11 @@
         </dependency>
         <dependency>
             <groupId>com.microservice.demo</groupId>
-            <artifactId>config-data</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.microservice.demo</groupId>
-            <artifactId>kafka-model</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.microservice.demo</groupId>
             <artifactId>kafka-admin</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.microservice.demo</groupId>
+            <artifactId>kafka-producer</artifactId>
         </dependency>
     </dependencies>
 
