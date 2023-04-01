@@ -15,6 +15,7 @@ public class RetryConfig {
         this.retryConfigData = configData;
 
     }
+
     @Bean
     public RetryTemplate retryTemplate(){
         RetryTemplate retryTemplate = new RetryTemplate();

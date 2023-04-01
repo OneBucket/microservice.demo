@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -64,7 +65,7 @@ public class KafkaAdminClient {
         List<NewTopic> kafkaTopics = topicsName.stream().map(topic -> new NewTopic(
                 topic.trim(),
                 kafkaConfigData.getNumOfPartitions(),
-                kafkaConfigData.getRepicationFactor()))
+                kafkaConfigData.getReplicationFactor()))
                 .collect(Collectors.toList());
         return adminClient.createTopics(kafkaTopics);
 
@@ -149,9 +150,11 @@ public class KafkaAdminClient {
 
     private HttpStatus getSchemaRegistryStatus() {
         try {
-            return webClient.method(HttpMethod.GET)
-                    .uri(kafkaConfigData.getSchemaRegisryUrl())
-                    .exchangeToMono(response -> Mono.just(response.statusCode()))
+            return webClient
+                    .method(HttpMethod.GET)
+                    .uri(kafkaConfigData.getSchemaRegistryUrl())
+                    .exchange()
+                    .map(ClientResponse::statusCode)
                     .block();
         } catch (Exception e) {
             return HttpStatus.SERVICE_UNAVAILABLE;

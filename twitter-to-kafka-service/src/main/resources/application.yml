@@ -24,14 +24,14 @@ retry-config:
   sleep-time-ms: 2000
 
 kafka-config:
-  bootstrap-server: localhost:19092, localhost:29092, localhost:39092
+  bootstrap-servers: localhost:19092, localhost:29092, localhost:39092
   schema-registry-url-key: schema.registry.url
   schema-registry-url: http://localhost:8081
   topic-name: twitter-topic
   topic-name-to-create:
     - twitter-topic
   num-of-partitions: 3
-  repication-factor: 3
+  replication-factor: 3
 
 kafka-producer-config:
   key-serializer-class: org.apache.kafka.common.serialization.LongSerializer

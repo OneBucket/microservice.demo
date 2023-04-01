@@ -2,6 +2,7 @@ package com.microservice.demo.twitter.to.kafka.service;
 
 
 import com.microservice.demo.config.TwitterToKafkaConfigData;
+import com.microservice.demo.twitter.to.kafka.service.init.StreamInitializer;
 import com.microservice.demo.twitter.to.kafka.service.runner.StreamRunner;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
@@ -21,7 +22,9 @@ public class TwitterToKafkaServiceApplication implements CommandLineRunner {
 
     private final StreamRunner streamRunner;
 
-    public TwitterToKafkaServiceApplication(TwitterToKafkaConfigData twitterToKafkaConfigData, StreamRunner streamRunner) {
+    private final StreamInitializer streamInitializer;
+
+    public TwitterToKafkaServiceApplication(TwitterToKafkaConfigData twitterToKafkaConfigData, StreamRunner streamRunner, StreamInitializer streamInitializer) {
         //using constructor rather than annotaion:
         //1.can set a final object which is immutable and thread safe
         //2.without using reflection, can be faster
@@ -29,6 +32,9 @@ public class TwitterToKafkaServiceApplication implements CommandLineRunner {
         this.twitterToKafkaConfigData = twitterToKafkaConfigData;
 
         this.streamRunner = streamRunner;
+
+
+        this.streamInitializer = streamInitializer;
     }
 
     public static void main(String[] args) {
@@ -40,6 +46,7 @@ public class TwitterToKafkaServiceApplication implements CommandLineRunner {
         LOG.info("start twitter to kafka application");
         LOG.info(twitterToKafkaConfigData.getTwitterKeywords().toString());
         LOG.info(twitterToKafkaConfigData.getWelcomeMessage().toString());
+        streamInitializer.init();
         streamRunner.start();
 
 
