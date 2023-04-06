@@ -91,7 +91,7 @@ public class KafkaAdminClient {
 
     }
 
-    private void checkMaxRetry(int retryCount, int maxRetryCount) {
+    private void checkMaxRetry(int retryCount, Integer maxRetryCount) {
         if(retryCount > maxRetryCount)
         {
             throw new KafkaClientException("reach max retry count");
@@ -135,16 +135,28 @@ public class KafkaAdminClient {
 
     }
 
+//    public void checkSchemaRegistry() {
+//        int maxRetryCount = retryConfigData.getMaxAttempts();
+//        //int retryCount = 1;
+//        int mutiplier = retryConfigData.getMultiplier().intValue();
+//        Long sleepTimeMs = retryConfigData.getSleepTimeMs();
+//        while (!getSchemaRegistryStatus().is2xxSuccessful()){
+//            for(int retryCount = 1; retryCount <= retryConfigData.getMaxAttempts(); retryCount ++) {
+//                sleepTimeMs *= mutiplier;
+//                sleep(sleepTimeMs);
+//          }
+//        }
+//    }
+
     public void checkSchemaRegistry() {
-        int maxRetryCount = retryConfigData.getMaxAttempts();
-        //int retryCount = 1;
-        int mutiplier = retryConfigData.getMultiplier().intValue();
+        int retryCount = 1;
+        Integer maxRetry = retryConfigData.getMaxAttempts();
+        int multiplier = retryConfigData.getMultiplier().intValue();
         Long sleepTimeMs = retryConfigData.getSleepTimeMs();
-        while (!getSchemaRegistryStatus().is2xxSuccessful()){
-            for(int retryCount = 1; retryCount <= retryConfigData.getMaxAttempts(); retryCount ++) {
-                sleepTimeMs *= mutiplier;
-                sleep(sleepTimeMs);
-          }
+        while (!getSchemaRegistryStatus().is2xxSuccessful()) {
+            checkMaxRetry(retryCount++, maxRetry);
+            sleep(sleepTimeMs);
+            sleepTimeMs *= multiplier;
         }
     }
 
