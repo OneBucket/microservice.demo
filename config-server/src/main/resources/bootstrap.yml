@@ -8,7 +8,7 @@ spring:
           uri: https://github.com/OneBucket/spring-cloud-config-server-repository
           default-label: main
           username: OneBucket
-          password: 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
+          password:
           clone-on-start: true
     fail-fast: true
   security:
